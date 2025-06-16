@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  #Code for graphin
 
 def hourly_load(np, csvData, pd):
     # Initialize a 24-hour load profile
