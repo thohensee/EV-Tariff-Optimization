@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt  #Code for graphing
 
-def hourly_load(np, csvData, pd):
+def get_hourly_load(np, csvData, pd):
     # Initialize a 24-hour load profile
     hourly_load = np.zeros(24)
+
 
     # Add up all EV loads at each active hour
     for index, row in csvData.iterrows():
@@ -17,18 +18,19 @@ def hourly_load(np, csvData, pd):
                 charge_time = 0
             if charge_time <= 0:
                 break
-        csvData.at[index, 'ChargeTime'] = charge_time
+        #csvData.at[index, 'ChargeTime'] = charge_time
     return hourly_load
 
-# Plot histogram
+# Plot Line Graph
+# Ensure simultaneous graphing capability
 def plot(hourly_load):
     plt.figure(figsize=(10, 6))
-    plt.bar(range(24), hourly_load, color='steelblue', width = 0.95)
+    plt.plot(range(24), hourly_load, marker='o', linestyle='-', color='steelblue')
     plt.title('EV Charging Load on Transformer')
     plt.xlabel('Hour')
     plt.ylabel('Power Demand (kW)')
     plt.xticks(range(24))
-    plt.grid(axis='y')
+    plt.grid(True)
     plt.tight_layout()
     plt.show()
 

@@ -1,9 +1,16 @@
 import pandas as pd  # array handler
 import numpy as np  # array builder
 import LoadDisplay  # graphs histogram
+import evParameters
 
-file_path = r"C:\Users\trist\PycharmProjects2\EV TOU Optimization\EV_data_case_study(Hoja2).csv"
+file_path = r"C:\Users\trist\PycharmProjects\EV TOU Optimization\EV_data_case_study(Hoja2).csv"
 
+# The 2D array is built off of the CSV file data,
+# and the code adds/manipulates additional columns for logic and graphing;
+# this function displays the data row-by-row in the terminal for analysis
+def see_data():
+    for index, row in csvData.head(5).iterrows():
+        print(index, row)
 
 # Handle overnight sessions (e.g., 22 to 6)
 def get_active_hours(row):
@@ -21,6 +28,7 @@ csvData = pd.read_csv(file_path, sep=';', decimal=',')
 
 ## CONVERT CSV DATA INTO 2D ARRAY WITH ADDED COLUMNS ##
 csvData.columns = csvData.columns.str.strip()
+
 csvData['ArrivalTime'] = pd.to_numeric(csvData['ArrivalTime'], errors='coerce')
 csvData['DepartureTime'] = pd.to_numeric(csvData['DepartureTime'], errors='coerce')
 csvData['EVSEPower_kW'] = pd.to_numeric(csvData['EVSEPower_kW'], errors='coerce')
@@ -30,23 +38,15 @@ csvData['EnergyDemand_kWh'] = pd.to_numeric(csvData['EnergyDemand_kWh'], errors=
 csvData['ActiveHours'] = csvData.apply(get_active_hours, axis=1)
 
 # New column for true charging duration (hours)
-csvData['ChargeTime'] = 0
-
-for index, row in csvData.iterrows():
-    csvData['ChargeTime'] = csvData['EnergyDemand_kWh'] / csvData['EVSEPower_kW']
+csvData['ChargeTime'] = csvData['EnergyDemand_kWh'] / csvData['EVSEPower_kW']
 
 
-hourly_load = LoadDisplay.hourly_load(np, csvData, pd)
-LoadDisplay.plot(hourly_load)
+##CONTROL CENTER##
+# COMMENT/UNCOMMENT SEQUENCES TO EXECUTE DIFFERENT FUNCTIONS
+# NOTE: NO LINES WILL RUN AFTER LoadDisplay.plot() UNTIL YOU "X" OUT GRAPH
 
-
-
-
-
-##OLD LINES##
-
-## Add up all EV loads at each active hour
-# for _, row in df.iterrows():
-#     for hour in row['ActiveHours']:
-#         if not pd.isna(row['EVSEPower_kW']):
-#             hourly_load[hour] += row['EVSEPower_kW']
+hourly_load = LoadDisplay.get_hourly_load(np, csvData, pd)
+#see_data()
+evParameters.organize_cheapest(csvData, 'wholesale')
+#LoadDisplay.plot(hourly_load)
+#print(csvData['ActiveHours'])
