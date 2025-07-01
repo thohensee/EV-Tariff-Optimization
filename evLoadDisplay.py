@@ -1,31 +1,36 @@
 import matplotlib.pyplot as plt  #Code for graphing
 
-def get_hourly_load(np, csvData, pd):
+def get_hourly_load(np, data, cheapest_hours = None):
     # Initialize a 24-hour load profile
     hourly_load = np.zeros(24)
-
-
     # Add up all EV loads at each active hour
-    for index, row in csvData.iterrows():
+    for index, row in data.iterrows():
         charge_time = row['ChargeTime']  # work on a local variable
-        for hour in row['ActiveHours']:
+
+        if cheapest_hours is None:
+            hours = row['ActiveHours'].copy()
+        else:
+            hours = cheapest_hours.loc[index].copy()
+
+        for hour in hours:
             if charge_time > 1:
-                if not pd.isna(row['EVSEPower_kW']):
-                    hourly_load[hour] += row['EVSEPower_kW']
-                    charge_time -= 1
+                hourly_load[hour] += row['EVSEPower_kW']
+                charge_time -= 1
             elif 1 > charge_time > 0:
                 hourly_load[hour] += row['EVSEPower_kW'] * charge_time
                 charge_time = 0
             if charge_time <= 0:
                 break
-        #csvData.at[index, 'ChargeTime'] = charge_time
     return hourly_load
 
 # Plot Line Graph
 # Ensure simultaneous graphing capability
-def plot(hourly_load):
+def plot(plots):
     plt.figure(figsize=(10, 6))
-    plt.plot(range(24), hourly_load, marker='o', linestyle='-', color='steelblue')
+
+    for plot in plots:
+        plt.plot(range(24), plot, marker='o', linestyle='-', color='steelblue')
+
     plt.title('EV Charging Load on Transformer')
     plt.xlabel('Hour')
     plt.ylabel('Power Demand (kW)')
