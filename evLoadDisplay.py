@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt  #Code for graphing
+import random
 
 def get_hourly_load(np, data, cheapest_hours = None):
     # Initialize a 24-hour load profile
@@ -10,7 +11,8 @@ def get_hourly_load(np, data, cheapest_hours = None):
         if cheapest_hours is None:
             hours = row['ActiveHours'].copy()
         else:
-            hours = cheapest_hours.loc[index].copy()
+            #hours = cheapest_hours.loc[index].copy()
+            hours = row['CheapestOrder'].copy()
 
         for hour in hours:
             if charge_time > 1:
@@ -29,7 +31,7 @@ def plot(plots):
     plt.figure(figsize=(10, 6))
 
     for plot in plots:
-        plt.plot(range(24), plot, marker='o', linestyle='-', color='steelblue')
+        plt.plot(range(24), plot, marker='o', linestyle='-', color=random_hex_color())
 
     plt.title('EV Charging Load on Transformer')
     plt.xlabel('Hour')
@@ -39,6 +41,6 @@ def plot(plots):
     plt.tight_layout()
     plt.show()
 
-# # Array data sent to console
-# for index, row in df.iterrows():
-#     print(index, row)
+# Random hex color
+def random_hex_color():
+    return "#{:06x}".format(random.randint(0, 0xFFFFFF))

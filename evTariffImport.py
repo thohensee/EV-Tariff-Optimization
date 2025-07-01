@@ -1,6 +1,9 @@
 import pandas as pd
 
 # Import residential TOU tariffs
+import pandas as pd
+
+# Import residential TOU tariffs
 resTariff_path = r"C:\Users\trist\PycharmProjects\EV TOU Optimization\Spanish_residential_TOU_tariff(Hoja1)_formatted.csv"
 resTariff = pd.read_csv(resTariff_path, sep=';', decimal=',', encoding='cp1252')
 resTariff.columns = resTariff.columns.str.strip()
@@ -15,6 +18,7 @@ wholeTariff.columns = wholeTariff.columns.str.strip()
 # Sends similar package to LoadDisplay for modified graph that represents the behavior of smart-charging consoles
 # if user decision to immediately charge is neglected
 def cheapest_flat_charge(data, tariffType):
+    print(tariffType)
     assign_tariff(data, tariffType)
     data['CheapestOrder'] = None  # Initialize empty column
     for index, row in data.iterrows():
@@ -39,7 +43,7 @@ def assign_tariff(data, tariffType):
     #These conditionals will be able to support inputs from evCustomTariffs.optimize_tariffs()
     if tariffType == 'wholesale':
         tariff = wholeTariff
-    elif tariffType == 'tou':
+    elif tariffType == 'residential':
         tariff = resTariff
     else:
         tariff = resTariff
@@ -57,6 +61,14 @@ def assign_tariff(data, tariffType):
         data.at[index, 'Tariff'] = tariff_list
 
     return data
+
+def get_tariffs(tariffType):
+    if tariffType == 'residential':
+        return resTariff
+    elif tariffType == 'wholesale':
+        return wholeTariff
+    else:
+        return None
 
 
 

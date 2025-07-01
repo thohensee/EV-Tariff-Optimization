@@ -1,20 +1,63 @@
 import numpy as np  # array handler
+import random
 
-##SEE GIT PUSH CAPTION FOR BREAKDOWN
-def optimize_tariffs(data, transformer_load):
-    hourly_load = transformer_load.copy()
-    tolerance = max(data['EVSEPower_kW'])  #kW difference considered "equal enough"
-    max_load_hour = np.argmax(hourly_load)
-    second_max_load_hour = None
+import evLoadDisplay
+import evTariffImport
 
-    load_copy = np.delete(hourly_load, max_load_hour)
+def optimize_tariffs(data, load):
+    penalty_tariff = evTariffImport.get_tariffs('residential').copy()
+    custom_optimized = None
 
-    while second_max_load_hour == None:
-    # print(max(hourly_load))
-    # print(max(load_copy))
-        break
+    hourly_load = load.copy()
+    max_load = np.max(hourly_load)
+    max_index = np.argmax(hourly_load)
 
-    return
+    # Use % 24 to handle circular indexing
+    left_index = (max_index - 1) % 24
+    right_index = (max_index + 1) % 24
+
+    max_left = hourly_load[left_index]
+    max_right = hourly_load[right_index]
+
+    if max_left >= max_right:
+        larger_difference = max_right
+        shift_index = right_index
+        smaller_difference = max_left
+    else:
+        larger_difference = max_left
+        shift_index = left_index
+        smaller_difference = max_right
+
+    shift_quantity = (max_load - larger_difference) / 2
+
+    shiftable_vehicles = []
+    #hours = data['CheapestHours'].copy()
+
+    data['ActiveChargeHours'] = []
+
+    for index, row in data.iterrows():
+        return
+
+    for index, row in data.iterrows():
+        if max_index in row['ActiveHours']:
+            if shift_index in row['ActiveHours']:
+                shiftable_vehicles.append(row['ActiveHours'])
+
+
+
+    pool_size = 100
+    penalty_tariff.at[max_index, 'Price_€/kWh'] += 0.01
+
+    # Randomly pick 100 unique indices from csvData
+    random_indices = np.random.choice(data.index, size=500, replace=False)
+
+    # Set 'Tariff' to 0 for those selected rows
+    data.loc[random_indices, 'Tariff'] = 0
+    #
+    # cheapest_hours_custom = evTariffImport.cheapest_flat_charge(data, 'custom', penalty_tariff)
+    # custom_optimized = evLoadDisplay.get_hourly_load(np, data, cheapest_hours_custom)
+    return hourly_load
+
 
 
 
