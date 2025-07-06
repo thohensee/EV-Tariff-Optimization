@@ -1,7 +1,5 @@
 import pandas as pd
-
-# Import residential TOU tariffs
-import pandas as pd
+import random
 
 # Import residential TOU tariffs
 resTariff_path = r"C:\Users\trist\PycharmProjects\EV TOU Optimization\Spanish_residential_TOU_tariff(Hoja1)_formatted.csv"
@@ -17,22 +15,33 @@ wholeTariff.columns = wholeTariff.columns.str.strip()
 # Iterates through pricing possibilities and sets charging commands for cheapest flat charge schedule
 # Sends similar package to LoadDisplay for modified graph that represents the behavior of smart-charging consoles
 # if user decision to immediately charge is neglected
-def cheapest_flat_charge(data, tariffType):
-    print(tariffType)
-    assign_tariff(data, tariffType)
+
+def cheapest_flat_charge(data, tariffType = 'custom'):
+    if tariffType != 'custom':
+        assign_tariff(data, tariffType)
+
     data['CheapestOrder'] = None  # Initialize empty column
+
     for index, row in data.iterrows():
         cheapest_order = []
         active_hours = row['ActiveHours'].copy()
         tariff = row['Tariff'].copy()
-        for hour in row['ActiveHours']:
-            min_tariff = min(tariff)
-            min_index = tariff.index(min_tariff)
-            cheapest_order.append(active_hours[min_index])
 
-            # Remove used entries to avoid repeats
-            del tariff[min_index]
-            del active_hours[min_index]
+        for hour in active_hours:
+            min_tariff = min(tariff)
+
+            # Find all indices where the tariff is equal to the minimum
+            min_indices = [i for i, value in enumerate(tariff) if value == min_tariff]
+
+            # Randomly choose one of those indices
+            chosen_index = random.choice(min_indices)
+
+            # Append the corresponding hour (not index) to the cheapest order
+            cheapest_order.append(active_hours[chosen_index])
+
+            # Remove the chosen entries to avoid repeats
+            del tariff[chosen_index]
+            del active_hours[chosen_index]
 
         # Assign entire list to dataframe cell
         data.at[index, 'CheapestOrder'] = cheapest_order
@@ -46,7 +55,7 @@ def assign_tariff(data, tariffType):
     elif tariffType == 'residential':
         tariff = resTariff
     else:
-        tariff = resTariff
+        tariffType = resTariff
 
     # Create new column in csvData
     data['Tariff'] = [[] for _ in range(len(data))]

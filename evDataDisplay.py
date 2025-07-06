@@ -57,27 +57,38 @@ data['ChargeTime'] = data['EnergyDemand_kWh'] / data['EVSEPower_kW']
 # NOTE: NO LINES WILL RUN AFTER LoadDisplay.plot() UNTIL YOU "X" OUT GRAPH
 # Create new column in csvData
 
-cheapest_hours_residential = evTariffImport.cheapest_flat_charge(data, 'residential')
-cheapest_hours_wholesale = evTariffImport.cheapest_flat_charge(data, 'wholesale')
-flat_optimized2 = evLoadDisplay.get_hourly_load(np, data, cheapest_hours_wholesale)
+evTariffImport.cheapest_flat_charge(data, 'residential')
+#cheapest_hours_wholesale = evTariffImport.cheapest_flat_charge(data, 'wholesale')
+#flat_optimized2 = evLoadDisplay.get_hourly_load(np, data, cheapest_hours_wholesale)
 
 ##Pre-optimized example plots##
 ## Flat charging as soon as car is plugged in
 flat_fromStart = evLoadDisplay.get_hourly_load(np, data)
 ## Charges based on cheapest TOU tariffs offered
-flat_res_cheapest = evLoadDisplay.get_hourly_load(np, data, cheapest_hours_residential)
+flat_res_cheapest = evLoadDisplay.get_hourly_load(np, data, 50)
 
 ## NOTE: in reality wholesale tariffs would not be directly accessed by consumers,
 ## plot is simply demonstrative
 
-#print(max(csvData['EVSEPower_kW']))
 
 ## Plot a single graph, or multiple
 plots = [flat_fromStart, flat_res_cheapest]
 #plots = [flat_fromStart]
 #plots = [flat_res_cheapest]
+#plots = []
+# for i in range(0,100,25):
+#     graph = evLoadDisplay.get_hourly_load(np, data, i)
+#     plots.append(graph)
+
+# blendPlot = evLoadDisplay.get_hourly_load(np, data)
+# plots.append(blendPlot)
+
+#see_data()
 
 ##Systematically randomizes adjacent vehicle shifting off of peak-load hours
-#plots.append(evCustomTariffs.optimize_tariffs(data, flat_res_cheapest))
+graphs = evCustomTariffs.optimize_tariffs(data, flat_res_cheapest)
+
+for graph in graphs:
+    plots.append(graph)
 
 evLoadDisplay.plot(plots)
