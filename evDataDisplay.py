@@ -63,8 +63,8 @@ evTariffImport.cheapest_flat_charge(data, 'tou')
 flat_fromStart = evLoadDisplay.get_hourly_load(np, data)
 
 ## Charges based on cheapest TOU tariffs offered
-flat_res_cheapest = evLoadDisplay.get_hourly_load(np, data, 20) #Participation
-custom = evLoadDisplay.get_hourly_load(np, data, 0)
+flat_res_cheapest = evLoadDisplay.get_hourly_load(np, data, None, True)
+custom = evLoadDisplay.get_hourly_load(np, data)
 
 ## Plot a single graph, or multiple
 plots = [flat_fromStart, flat_res_cheapest]
@@ -73,7 +73,8 @@ plots = [flat_fromStart, flat_res_cheapest]
 #plots = []
 
 ##Systematically randomizes adjacent vehicle shifting off of peak-load hours
-graphs = evCustomTariffs.optimize_tariffs(data, custom)
+participants = 965 # out of 965
+graphs = evCustomTariffs.optimize_tariffs(data, custom, participants)
 
 for graph in graphs:
     plots.append(graph)

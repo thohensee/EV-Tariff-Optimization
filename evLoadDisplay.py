@@ -33,27 +33,24 @@ random_indices = []
 #                 break
 #     return hourly_load
 
-def get_hourly_load(np, data, cheapest_percent = 0):
+def get_hourly_load(np, data, indices = None, cheapest = False):
     # Initialize a 24-hour load profile
     hourly_load = np.zeros(24)
-    random_indices = []
+    random_indices = indices
     hours = None
 
-    # Apply base residential household on transformer
-    for hour in range(24):
-        hourly_load[hour] += baseLoad.at[hour, 'Demand_kWh']
-
-    if cheapest_percent != None:
-        cheapest_percent = cheapest_percent / 100
-        pool_size = math.floor(len(data) * cheapest_percent)
-        random_indices = np.random.choice(data.index, size=pool_size, replace=False)
+    # # Apply base residential household on transformer
+    # for hour in range(24):
+    #     hourly_load[hour] += baseLoad.at[hour, 'Demand_kWh']
 
     # Add up all EV loads at each active hour
     for index, row in data.iterrows():
         charge_time = row['ChargeTime']  # work on a local variable
 
-        if cheapest_percent is None:
+        if indices is None:
             hours = row['ActiveHours'].copy()
+            if cheapest == True:
+                hours = row['CheapestOrder'].copy()
         else:
             if index in random_indices:
                 hours = row['CheapestOrder'].copy()
@@ -94,7 +91,8 @@ def plot(plots):
         elif i == len(plots) - 1:
             color = 'black'
         else:
-            color = 'orange'
+            color = 'none'
+            alpha = 0
 
         plt.plot(range(24), plot, marker='o', linestyle='-', color=color)
 

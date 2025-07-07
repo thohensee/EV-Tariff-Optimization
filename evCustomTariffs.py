@@ -8,21 +8,21 @@ baseLoad_path = r"C:\Users\trist\PycharmProjects\EV TOU Optimization\Residential
 baseLoad = pd.read_csv(baseLoad_path, sep=';', decimal=',', encoding='cp1252')
 baseLoad.columns = baseLoad.columns.str.strip()
 
-def optimize_tariffs(data, load):
+def optimize_tariffs(data, load, participants):
     momentum = np.zeros(24)  # Momentum vector for each hour
     beta = 0.9  # Momentum factor (controls memory)
     lr = 0.05  # Learning rate for tariff update
     min_price = 0.00  # €/kWh
     max_price = 0.2  # €/kWh
     shifted_graphs = []
-    pool_size = 965
+    pool_size = participants
     hourly_load = load.copy()
 
     # Randomly pick 100 unique indices from csvData
     random_indices = np.random.choice(data.index, size=pool_size, replace=False)
 
     # Apply base residential household on transformer
-    for hour in range(10):
+    for hour in range(24): ##DONT ACCIDENTALLY CHANGE##
         hourly_load[hour] += baseLoad.at[hour, 'Demand_kWh']
 
     penalty_tariff = evTariffImport.get_tariffs('tou').copy()
@@ -30,7 +30,7 @@ def optimize_tariffs(data, load):
     threshold = 0.1  # kW difference tolerance
     previous_load = np.array(hourly_load)
 
-    for i in range(20):
+    for i in range(50):
         # for i in range(0, 500, 100):
         custom_optimized = None
 
@@ -83,7 +83,7 @@ def optimize_tariffs(data, load):
                 tariff[i] = float(penalty_tariff.at[i, 'Price_€/kWh'])
 
         evTariffImport.cheapest_flat_charge(data, 'custom')
-        shifted_hours = evLoadDisplay.get_hourly_load(np, data, 100)
+        shifted_hours = evLoadDisplay.get_hourly_load(np, data, random_indices)
         shifted_graphs.append(shifted_hours)
         hourly_load = shifted_hours
 
