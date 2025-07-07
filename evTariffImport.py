@@ -49,10 +49,12 @@ def cheapest_flat_charge(data, tariffType = 'custom'):
     return data['CheapestOrder']
 
 def assign_tariff(data, tariffType):
+    tariff = []
+
     #These conditionals will be able to support inputs from evCustomTariffs.optimize_tariffs()
     if tariffType == 'wholesale':
         tariff = wholeTariff
-    elif tariffType == 'residential':
+    elif tariffType == 'tou':
         tariff = resTariff
     else:
         tariffType = resTariff
@@ -72,7 +74,7 @@ def assign_tariff(data, tariffType):
     return data
 
 def get_tariffs(tariffType):
-    if tariffType == 'residential':
+    if tariffType == 'tou':
         return resTariff
     elif tariffType == 'wholesale':
         return wholeTariff

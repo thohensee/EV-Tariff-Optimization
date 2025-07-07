@@ -17,9 +17,6 @@ def see_data():
     for index, row in data.head(5).iterrows():
         print(index, row)
 
-def get_plots():
-    return plots
-
 # Handle overnight sessions (e.g., 22 to 6)
 # Vector operation (performs math on entire rows/columns)
 def get_active_hours(row):
@@ -57,38 +54,33 @@ data['ChargeTime'] = data['EnergyDemand_kWh'] / data['EVSEPower_kW']
 # NOTE: NO LINES WILL RUN AFTER LoadDisplay.plot() UNTIL YOU "X" OUT GRAPH
 # Create new column in csvData
 
-evTariffImport.cheapest_flat_charge(data, 'residential')
+evTariffImport.cheapest_flat_charge(data, 'tou')
 #cheapest_hours_wholesale = evTariffImport.cheapest_flat_charge(data, 'wholesale')
 #flat_optimized2 = evLoadDisplay.get_hourly_load(np, data, cheapest_hours_wholesale)
 
 ##Pre-optimized example plots##
 ## Flat charging as soon as car is plugged in
 flat_fromStart = evLoadDisplay.get_hourly_load(np, data)
+
 ## Charges based on cheapest TOU tariffs offered
-flat_res_cheapest = evLoadDisplay.get_hourly_load(np, data, 50)
-
-## NOTE: in reality wholesale tariffs would not be directly accessed by consumers,
-## plot is simply demonstrative
-
+flat_res_cheapest = evLoadDisplay.get_hourly_load(np, data, 20) #Participation
+custom = evLoadDisplay.get_hourly_load(np, data, 0)
 
 ## Plot a single graph, or multiple
 plots = [flat_fromStart, flat_res_cheapest]
 #plots = [flat_fromStart]
 #plots = [flat_res_cheapest]
 #plots = []
-# for i in range(0,100,25):
-#     graph = evLoadDisplay.get_hourly_load(np, data, i)
-#     plots.append(graph)
-
-# blendPlot = evLoadDisplay.get_hourly_load(np, data)
-# plots.append(blendPlot)
-
-#see_data()
 
 ##Systematically randomizes adjacent vehicle shifting off of peak-load hours
-graphs = evCustomTariffs.optimize_tariffs(data, flat_res_cheapest)
+graphs = evCustomTariffs.optimize_tariffs(data, custom)
 
 for graph in graphs:
     plots.append(graph)
 
+#see_data()
+
 evLoadDisplay.plot(plots)
+
+#Add residential load and subtract after iteration so iterations act based on overall load
+#Make pool_size act in accordance to cheapest_percent

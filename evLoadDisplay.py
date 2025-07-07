@@ -8,6 +8,8 @@ baseLoad_path = r"C:\Users\trist\PycharmProjects\EV TOU Optimization\Residential
 baseLoad = pd.read_csv(baseLoad_path, sep=';', decimal=',', encoding='cp1252')
 baseLoad.columns = baseLoad.columns.str.strip()
 
+random_indices = []
+
 # def get_hourly_load(np, data, flat_percent = None):
 #     # Initialize a 24-hour load profile
 #     hourly_load = np.zeros(24)
@@ -31,7 +33,7 @@ baseLoad.columns = baseLoad.columns.str.strip()
 #                 break
 #     return hourly_load
 
-def get_hourly_load(np, data, flat_percent = 0):
+def get_hourly_load(np, data, cheapest_percent = 0):
     # Initialize a 24-hour load profile
     hourly_load = np.zeros(24)
     random_indices = []
@@ -41,16 +43,16 @@ def get_hourly_load(np, data, flat_percent = 0):
     for hour in range(24):
         hourly_load[hour] += baseLoad.at[hour, 'Demand_kWh']
 
-    if flat_percent != None:
-        flat_percent = flat_percent / 100
-        pool_size = math.floor(len(data) * flat_percent)
+    if cheapest_percent != None:
+        cheapest_percent = cheapest_percent / 100
+        pool_size = math.floor(len(data) * cheapest_percent)
         random_indices = np.random.choice(data.index, size=pool_size, replace=False)
 
     # Add up all EV loads at each active hour
     for index, row in data.iterrows():
         charge_time = row['ChargeTime']  # work on a local variable
 
-        if flat_percent is None:
+        if cheapest_percent is None:
             hours = row['ActiveHours'].copy()
         else:
             if index in random_indices:
@@ -75,18 +77,27 @@ def plot(plots):
     plt.figure(figsize=(10, 6))
     max_loads = []
 
-    for i in range(len(plots)):
-        plot = plots[i]
+    # First, calculate peak loads
+    for plot in plots:
         max_loads.append(max(plot))
 
-        if i == 0:
-            lines = plt.plot(range(24), plot, marker='o', linestyle='-', color='red')
-        elif i == len(plots) - 1:
-            lines = plt.plot(range(24), plot, marker='o', linestyle='-', color='black')
-        else:
-            lines = plt.plot(range(24), plot, marker='o', linestyle='-', color='blue')
+    # Find the index with the lowest peak load
+    min_index = max_loads.index(min(max_loads))
 
-        line = lines[0]
+    for i, plot in enumerate(plots):
+        if i == 0:
+            color = 'red'
+        elif i == 1:
+            color = 'green'
+        elif i == min_index:
+            color = 'yellow'  # Best peak load reduction
+        elif i == len(plots) - 1:
+            color = 'black'
+        else:
+            color = 'orange'
+
+        plt.plot(range(24), plot, marker='o', linestyle='-', color=color)
+
     print(max(plots[0]) - min(max_loads))
 
     plt.title('EV Charging Load on Transformer')
@@ -97,6 +108,6 @@ def plot(plots):
     plt.tight_layout()
     plt.show()
 
-# # Random hex color
-# def random_color():
-#     return random.choice(list(CSS4_COLORS.keys()))
+# Random hex color
+def random_color():
+    return random.choice(list(CSS4_COLORS.keys()))
